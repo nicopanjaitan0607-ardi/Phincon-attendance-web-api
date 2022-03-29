@@ -1,0 +1,67 @@
+version: '3'
+
+networks:
+  phincon-attendance-net:
+    name: phincon-attendance-net
+    ipam:
+      config:
+        - subnet: 172.16.0.0/28
+          gateway: 172.16.0.1
+
+services:
+  phincon-attendance-mongo:
+    container_name: phincon-attendance-mongo
+    image: mongo:4.4.12
+    restart: always
+    volumes:
+      - ./database:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: phincon-attendance-123!
+    networks:
+      phincon-attendance-net:
+        ipv4_address: 172.16.0.2
+    ports:
+      - 27017:27017
+    mem_limit: 64M
+    mem_swappiness: 10
+    memswap_limit: 1G
+  phincon-attendance-mongo-express:
+    container_name: phincon-attendance-mongo-express
+    image: mongo-express:0.54
+    restart: always
+    depends_on:
+      - phincon-attendance-mongo
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=phincon-attendance-mongo
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=admin
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=phincon-attendance-123!
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=phincon123
+    networks:
+      phincon-attendance-net:
+        ipv4_address: 172.16.0.3
+    ports:
+      - 8081:8081
+    mem_limit: 64M
+    mem_swappiness: 10
+    memswap_limit: 1G
+  # phincon-attendance-web-api:
+  #   container_name: phincon-attendance-web-api
+  #   build: .
+  #   command: yarn start
+  #   restart: always
+  #   volumes:
+  #     - .:/code
+  #     - /code/node_modules
+  #   networks:
+  #     phincon-attendance-net:
+  #       ipv4_address: 172.16.0.4
+  #   ports:
+  #     - 5000:5000
+  #   mem_limit: 64M
+  #   mem_swappiness: 10
+  #   memswap_limit: 1G
