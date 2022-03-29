@@ -13,4 +13,3 @@ RUN yarn install
 expose 5000
 
 CMD ["yarn", "start"]
-
